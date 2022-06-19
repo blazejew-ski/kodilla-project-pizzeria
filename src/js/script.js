@@ -21,6 +21,7 @@
       form: '.product__order',
       priceElem: '.product__total-price .price',
       imageWrapper: '.product__images',
+      paramsWrapper: '.product__params',
       amountWidget: '.widget-amount',
       cartButton: '[href="#add-to-cart"]',
     },
@@ -78,8 +79,8 @@
 
       /* add element to menu */
       menuContainer.appendChild(thisProduct.element);
-
     }
+
     getElements(){
       const thisProduct = this;
     
@@ -88,10 +89,10 @@
       thisProduct.formInputs = thisProduct.form.querySelectorAll(select.all.formInputs);
       thisProduct.cartButton = thisProduct.element.querySelector(select.menuProduct.cartButton);
       thisProduct.priceElem = thisProduct.element.querySelector(select.menuProduct.priceElem);
-    
-    
-    
+      thisProduct.imageWrapper = thisProduct.element.querySelector(select.menuProduct.imageWrapper);
+      thisProduct.paramsWrapper = thisProduct.element.querySelector(select.menuProduct.paramsWrapper);
     }
+
     initAcordion(){
       const thisProduct = this;
       //console.log('thisProduct:', thisProduct);
@@ -162,9 +163,9 @@
           // determine option value, e.g. optionId = 'olives', option = { label: 'Olives', price: 2, default: true }
           const option = param.options[optionId];
           console.log('optionId:', optionId, option);
-          console.log('price przed obliczeniami:', price);
+          console.log('price before calculation:', price);
+          
           // check if there is param with a name of paramId in formData and if it includes optionId
-
           if(formData[paramId] && formData[paramId].includes(optionId)) {
             // check if the option is not default
             if(option['default'] != true) {
@@ -176,7 +177,26 @@
               price = price - option['price'];
             }
           }
-          console.log('price po obliczeniach:', price);
+          console.log('price after calculation:', price);
+
+          // define variables for image toggling and form input checking
+          console.log('thisProduct.imageWrapper:', thisProduct.imageWrapper);
+          const optionImage = thisProduct.imageWrapper.querySelector('.' + paramId + '-' + optionId);
+          console.log('optionImage:', optionImage);
+          const optionForm = thisProduct.paramsWrapper.querySelector('input[value="' + optionId + '"]');
+          console.log('optionForm:', optionForm);
+
+          // check if input with optionId value is checked in the form - if yes add active class, if not - remove it.
+          if(optionImage && optionForm.checked) {
+            console.log('optionId && optionForm.checked', optionId && optionForm.checked);
+            optionImage.classList.add(classNames.menuProduct.imageVisible);
+            console.log('optionImage with class:', optionImage);
+          }
+          if(optionImage && !optionForm.checked) {
+            console.log('optionId && optionForm.checked', optionId && optionForm.checked);
+            optionImage.classList.remove(classNames.menuProduct.imageVisible);
+            console.log('optionImage with class:', optionImage);
+          }
         }
       }
 
