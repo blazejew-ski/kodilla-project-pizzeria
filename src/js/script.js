@@ -236,7 +236,7 @@
     setValue(value){
       const thisWidget = this;
       const newValue = parseInt(value);
-
+      thisWidget.value = settings.amountWidget.defaultValue;
       /* TODO: add validation */
       
       console.log('thisWidget.value', thisWidget.value);
