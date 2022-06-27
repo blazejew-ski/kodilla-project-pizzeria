@@ -400,13 +400,16 @@
 
       console.log('adding product', menuProduct);
       
-      const generatedHTML = templates.cartProduct(menuProduct);
+      if (menuProduct !== undefined){
+        const generatedHTML = templates.cartProduct(menuProduct);
 
-      thisCart.element = utils.createDOMFromHTML(generatedHTML);
+        thisCart.element = utils.createDOMFromHTML(generatedHTML);
+  
+        const cartContainer = document.querySelector(select.cart.productList);
+  
+        cartContainer.appendChild(thisCart.element);
+      }
 
-      const cartContainer = document.querySelector(select.cart.productList);
-
-      cartContainer.appendChild(thisCart.element);
     }
   }
 
