@@ -260,15 +260,17 @@
       thisWidget.input = thisWidget.element.querySelector(select.widgets.amount.input);
       thisWidget.linkDecrease = thisWidget.element.querySelector(select.widgets.amount.linkDecrease);
       thisWidget.linkIncrease = thisWidget.element.querySelector(select.widgets.amount.linkIncrease);
+      thisWidget.value = settings.amountWidget.defaultValue;
     }
     setValue(value){
       const thisWidget = this;
       const newValue = parseInt(value);
-      thisWidget.value = settings.amountWidget.defaultValue;
+      
       /* TODO: add validation */
       
       console.log('thisWidget.value', thisWidget.value);
       console.log('thisWidget.input.value', thisWidget.input.value);
+      
       if(thisWidget.value !== newValue && !isNaN(newValue) && newValue >= settings.amountWidget.defaultMin && newValue <= settings.amountWidget.defaultMax){
         thisWidget.value = newValue;
         console.log('thisWidget.value', thisWidget.value);
@@ -301,7 +303,20 @@
     }
   }
 
+  class Cart{
+    constructor(element){
+      const thisCart = this;
+      thisCart.products = [];
+      thisCart.getElements(element);
+      console.log('new cart', thisCart);
+    }
   
+    getElements(element){
+      const thisCart = this;
+      thisCart.dom = {};
+      thisCart.dom.wrapper = element;
+    }
+  }
 
   const app = {
     initData: function(){
@@ -317,6 +332,13 @@
       }
     },
 
+    initCart: function(){
+      const thisApp = this;
+
+      const cartElem = document.querySelector(select.containerOf.cart);
+      thisApp.Cart = new Cart(cartElem);
+    },
+
     init: function(){
       const thisApp = this;
       console.log('*** App starting ***');
@@ -327,6 +349,7 @@
 
       thisApp.initData();
       thisApp.initMenu();
+      thisApp.initCart();
     },
   };
 
