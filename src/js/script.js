@@ -92,7 +92,6 @@
       thisProduct.initOrderForm();
       thisProduct.initAmountWidget();
       thisProduct.processOrder();
-      console.log('new Product:', thisProduct);
     }
     renderInMenu(){
       const thisProduct = this;
@@ -125,14 +124,8 @@
 
     initAcordion(){
       const thisProduct = this;
-      //console.log('thisProduct:', thisProduct);
 
-      /* find the clickable trigger (the element that should react to clicking) */
-      // not needed anymore thanks to getelements() -> thisProduct.accordionTrigger = thisProduct.element.querySelector(select.menuProduct.clickable);
-      //const thisProductClickableTrigger = thisProduct.element.querySelector(select.menuProduct.clickable); */
       const thisProductElement = thisProduct.element;
-      // console.log('thisProductClickableTrigger:', thisProductClickableTrigger);
-      //console.log('thisProductElement:', thisProductElement);
 
       /* START: add event listener to clickable trigger on event click */
       thisProduct.accordionTrigger.addEventListener('click', function(event) {          
@@ -143,7 +136,6 @@
 
         /* find active product (product that has active class) */
         for (let product of products) {
-          //console.log('product:', product);
           /* if there is active product and it's not thisProduct.element, remove class active from it */
           if (thisProductElement != product){
             product.classList.remove(classNames.menuProduct.wrapperActive);
@@ -157,7 +149,6 @@
     }
     initOrderForm(){
       const thisProduct = this;
-      console.log('initOrderForm - thisProduct', thisProduct);
       thisProduct.form.addEventListener('submit', function(event){
         event.preventDefault();
         thisProduct.processOrder();
@@ -177,9 +168,7 @@
     }
     processOrder(){
       const thisProduct = this;
-      console.log('processOrder - thisProduct', thisProduct);
       const formData = utils.serializeFormToObject(thisProduct.form);
-      console.log('formData', formData);
       // set price to default price
       let price = thisProduct.data.price;
 
@@ -187,14 +176,11 @@
       for(let paramId in thisProduct.data.params) {
         // determine param value, e.g. paramId = 'toppings', param = { label: 'Toppings', type: 'checkboxes'... }
         const param = thisProduct.data.params[paramId];
-        console.log(paramId, param);
 
         // for every option in this category
         for(let optionId in param.options) {
           // determine option value, e.g. optionId = 'olives', option = { label: 'Olives', price: 2, default: true }
           const option = param.options[optionId];
-          console.log('optionId:', optionId, option);
-          console.log('price before calculation:', price);
           
           // check if there is param with a name of paramId in formData and if it includes optionId
           if(formData[paramId] && formData[paramId].includes(optionId)) {
@@ -208,25 +194,17 @@
               price = price - option['price'];
             }
           }
-          console.log('price after calculation:', price);
 
           // define variables for image toggling and form input checking
-          console.log('thisProduct.imageWrapper:', thisProduct.imageWrapper);
           const optionImage = thisProduct.imageWrapper.querySelector('.' + paramId + '-' + optionId);
-          console.log('optionImage:', optionImage);
           const optionForm = thisProduct.paramsWrapper.querySelector('input[value="' + optionId + '"]');
-          console.log('optionForm:', optionForm);
 
           // check if input with optionId value is checked in the form - if yes add active class, if not - remove it.
           if(optionImage && optionForm.checked) {
-            console.log('optionId && optionForm.checked', optionId && optionForm.checked);
             optionImage.classList.add(classNames.menuProduct.imageVisible);
-            console.log('optionImage with class:', optionImage);
           }
           if(optionImage && !optionForm.checked) {
-            console.log('optionId && optionForm.checked', optionId && optionForm.checked);
             optionImage.classList.remove(classNames.menuProduct.imageVisible);
-            console.log('optionImage with class:', optionImage);
           }
         }
       }
@@ -312,8 +290,6 @@
   class AmountWidget {
     constructor(element){
       const thisWidget = this;
-      console.log('AmountWidget:', thisWidget);
-      console.log('constructor arguments:', element);
       thisWidget.getElements(element);
       thisWidget.setValue(thisWidget.input.value);
       thisWidget.initActions();
@@ -331,13 +307,8 @@
       const thisWidget = this;
       const newValue = parseInt(value);
       
-      console.log('thisWidget.value', thisWidget.value);
-      console.log('thisWidget.input.value', thisWidget.input.value);
-      
       if(thisWidget.value !== newValue && !isNaN(newValue) && newValue >= settings.amountWidget.defaultMin && newValue <= settings.amountWidget.defaultMax){
-        thisWidget.value = newValue;
-        console.log('thisWidget.value', thisWidget.value);
-        
+        thisWidget.value = newValue;   
       }
       thisWidget.input.value = thisWidget.value;
       this.announce();
@@ -373,7 +344,6 @@
       thisCart.getElements(element);
       thisCart.initActions();
       thisCart.add();
-      console.log('new cart', thisCart);
     }
   
     getElements(element){
@@ -382,7 +352,10 @@
       thisCart.dom.wrapper = element;
       thisCart.dom.toggleTrigger = thisCart.dom.wrapper.querySelector(select.cart.toggleTrigger);
       thisCart.dom.productList = thisCart.dom.wrapper.querySelector(select.cart.productList);
-
+      thisCart.dom.deliveryFee = thisCart.dom.wrapper.querySelector(select.cart.deliveryFee);
+      thisCart.dom.subtotalPrice = thisCart.dom.wrapper.querySelector(select.cart.subtotalPrice);
+      thisCart.dom.totalPrice = thisCart.dom.wrapper.querySelectorAll(select.cart.totalPrice);
+      thisCart.dom.totalNumber = thisCart.dom.wrapper.querySelector(select.cart.totalNumber);
     }
 
     initActions(){
@@ -396,7 +369,6 @@
     add(menuProduct){
       const thisCart = this;
 
-      console.log('adding product', menuProduct);
       
       if (menuProduct !== undefined){
         const generatedHTML = templates.cartProduct(menuProduct);
@@ -410,8 +382,39 @@
         cartContainer.appendChild(generatedDOM);
 
         thisCart.products.push(new CartProduct(menuProduct, generatedDOM));
-        console.log('thisCart.products ', thisCart.products);
       }
+      thisCart.update();
+    }
+
+    update(){
+      const thisCart = this;
+
+      const deliveryFee = settings.cart.defaultDeliveryFee;
+      let totalNumber = 0;
+      let subtotalPrice = 0;
+
+      for (const product of thisCart.products) {
+        totalNumber++;
+        console.log('totalNumber',totalNumber);
+        subtotalPrice = subtotalPrice + product['price'];
+        console.log('subtotalPrice',subtotalPrice);
+      }
+      if (subtotalPrice >= 1) {
+        thisCart.totalPrice = subtotalPrice + deliveryFee;
+      }
+      else {
+        thisCart.totalPrice = 0;
+      }
+      
+      console.log('thisCart.totalPrice',thisCart.totalPrice);
+
+      thisCart.dom.deliveryFee.innerHTML = deliveryFee;
+      thisCart.dom.subtotalPrice.innerHTML = subtotalPrice;
+      thisCart.dom.totalNumber.innerHTML = totalNumber;
+      thisCart.dom.totalPrice.innerHTML = thisCart.totalPrice;
+      thisCart.dom.totalPrice.forEach((element) => {
+        element.innerHTML = thisCart.totalPrice;;
+      });
     }
   }
 
@@ -462,7 +465,6 @@
 
     initMenu: function(){
       const thisApp = this;
-      //console.log('thisApp.data:', thisApp.data);
       for(let productData in thisApp.data.products){
         new Product(productData, thisApp.data.products[productData]);
       }
