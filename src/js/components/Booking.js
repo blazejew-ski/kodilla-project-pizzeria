@@ -1,4 +1,4 @@
-import {settings, select, classNames,templates} from '../settings.js';
+import {select, templates} from '../settings.js';
 import utils from '../utils.js';
 import AmountWidget from './AmountWidget.js';
 
@@ -13,7 +13,7 @@ class Booking {
     const thisBoo = this;
     const generatedHTML = templates.bookingWidget();
     thisBoo.element = utils.createDOMFromHTML(generatedHTML);
-    const bookingContainer = document.querySelector(select.containerOf.booking)
+    const bookingContainer = document.querySelector(select.containerOf.booking);
     bookingContainer.appendChild(thisBoo.element);
   }
   getElements(element){
