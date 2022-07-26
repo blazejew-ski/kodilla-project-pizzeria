@@ -166,6 +166,14 @@ class Booking {
     thisBoo.dom.datePicker = thisBoo.dom.element.querySelector(select.widgets.datePicker.wrapper);
     thisBoo.dom.hourPicker = thisBoo.dom.element.querySelector(select.widgets.hourPicker.wrapper);
     thisBoo.dom.tables = thisBoo.dom.element.querySelectorAll(select.booking.tables);
+    thisBoo.dom.floorPlan = thisBoo.dom.element.querySelector(select.containerOf.floorPlan);
+    thisBoo.dom.bookingForm = thisBoo.dom.element.querySelector(select.containerOf.bookingForm);
+    thisBoo.dom.address = thisBoo.dom.element.querySelector(select.booking.address);
+    thisBoo.dom.phone = thisBoo.dom.element.querySelector(select.booking.phone);
+    thisBoo.selectedTable = null;
+    thisBoo.starters = [];
+    console.log('thisBoo.dom.address', thisBoo.dom.address);
+    console.log('thisBoo.dom.phone', thisBoo.dom.phone);
   }
 
   initWidgets(){
@@ -176,9 +184,101 @@ class Booking {
     thisBoo.datePicker = new DatePicker(thisBoo.dom.datePicker);
     thisBoo.hourPicker = new HourPicker(thisBoo.dom.hourPicker);
 
-    thisBoo.dom.element.addEventListener('updated', function(){
+    thisBoo.dom.element.addEventListener('updated', function(event){
       thisBoo.updateDOM();
+      thisBoo.initTables(event);
     });
+
+    thisBoo.dom.floorPlan.addEventListener('click', function(event){
+      thisBoo.initTables(event);
+    });
+
+    thisBoo.dom.bookingForm.addEventListener('submit', function(event) {
+      event.preventDefault();
+      if(!thisBoo.selectedTable) {
+        alert('Please select a table first');
+        return;
+      } if(!thisBoo.dom.address.value) {
+        alert('Please type your address');
+        return;
+      } if(!thisBoo.dom.phone.value) {
+        alert('Please type your phone number');
+        return;
+      } else {
+        thisBoo.sendBooking();
+      }
+    });
+
+    document.querySelector(select.containerOf.bookingForm).addEventListener('click', function(event) {
+      if(event.target.tagName == 'INPUT' && event.target.name == 'starter' && event.target.type == 'checkbox'){
+        if (!event.target.checked){
+          thisBoo.starters = thisBoo.starters.filter(function(e) {
+            return e !== event.target.value;
+          });
+        }
+        else {
+          thisBoo.starters.push(event.target.value);
+        }
+      }
+      console.log('thisBoo.starters', thisBoo.starters);
+    });
+  }
+
+  initTables(event){
+    const thisBoo = this;
+    for(let table of thisBoo.dom.tables){
+      table.classList.remove(classNames.booking.tableSelected);
+      thisBoo.selectedTable = null;
+    }
+    if(event.target.classList.contains('booked')) {
+      alert('table is reserved for someone else :(');
+      thisBoo.selectedTable = null;
+    }
+    else if(event.target.classList.contains('table')) {
+      event.target.classList.add(classNames.booking.tableSelected);
+      thisBoo.selectedTable = parseInt(event.target.getAttribute(settings.booking.tableIdAttribute));
+    }
+  }
+
+  sendBooking(){
+    const thisBoo = this;
+
+    const url = settings.db.url + '/' + settings.db.bookings;
+    const payload = {
+      date: thisBoo.datePicker.correctValue,
+      hour: thisBoo.hourPicker.correctValue,
+      table: thisBoo.selectedTable,
+      repeat: false,
+      duration: thisBoo.hoursAmount.correctValue,
+      ppl: thisBoo.peopleAmount.correctValue,
+      phone: thisBoo.dom.phone.value,
+      address: thisBoo.dom.address.value,
+      starters: []
+    };
+
+    for(let starter of thisBoo.starters) {
+      payload.starters.push(starter);
+    }
+
+    console.log('payload', payload);
+
+    const options = {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(payload),
+    };
+
+    fetch(url, options)
+      .then(function(response){
+        return response.json();
+      }).then(function(parsedResponse){
+        console.log('parsedResponse', parsedResponse);
+      });
+
+    thisBoo.makeBooked(payload.date, payload.hour, payload.duration, payload.table);
+    thisBoo.updateDOM();
   }
 }
 
