@@ -2,6 +2,7 @@ import {settings, select, classNames, templates} from './settings.js';
 import Product from './components/Product.js';
 import Cart from './components/Cart.js';
 import Booking from './components/Booking.js';
+import Home from './components/Home.js';
 
 const app = {
   initData: function(){
@@ -50,6 +51,7 @@ const app = {
 
     thisApp.pages = document.querySelector(select.containerOf.pages).children;
     thisApp.navLinks = document.querySelectorAll(select.nav.links);
+    thisApp.topWrapper = document.querySelectorAll(select.containerOf.top);
 
     const idFromHash = window.location.hash.replace('#/','');
     console.log('idFromHash', idFromHash);
@@ -66,6 +68,19 @@ const app = {
     thisApp.activatePage(pageMatchingHash);
 
     for(let link of thisApp.navLinks){
+      link.addEventListener('click', function(event){
+        const clickedElement = this;
+        event.preventDefault();
+        // get page id from href attribute
+        const id = clickedElement.getAttribute('href').replace('#','');
+        // run thisApp.activatePage() with this id
+        thisApp.activatePage(id);
+        // change URL hash
+        window.location.hash = '#/' + id;
+      });
+    }
+
+    for(let link of thisApp.topWrapper){
       link.addEventListener('click', function(event){
         const clickedElement = this;
         event.preventDefault();
@@ -99,6 +114,30 @@ const app = {
 
   },
 
+  initHome: function(){
+    const thisApp = this;
+
+    thisApp.homeContainer = document.querySelector(select.containerOf.home);
+    thisApp.home = new Home(thisApp.homeContainer);
+
+  },
+
+  initCarousel: function(){
+    const thisApp = this;
+
+    thisApp.carouselContainer = document.querySelector(select.containerOf.carousel);
+    // eslint-disable-next-line no-unused-vars, no-undef
+    const flkty = new Flickity(thisApp.carouselContainer, {
+      cellAlign: 'left',
+      wrapAround: true,
+      draggable: true,
+      autoPlay: 3000,
+      pauseAutoPlayOnHover: true,
+      prevNextButtons: false
+    });
+
+  },
+
   init: function(){
     const thisApp = this;
     console.log('*** App starting ***');
@@ -106,11 +145,13 @@ const app = {
     console.log('classNames:', classNames);
     console.log('settings:', settings);
     console.log('templates:', templates);
-    thisApp.initPages();
+    thisApp.initHome();
     thisApp.initData();
     //thisApp.initMenu();
     thisApp.initCart();
     thisApp.initBooking();
+    thisApp.initPages();
+    thisApp.initCarousel();
   },
 };
 
